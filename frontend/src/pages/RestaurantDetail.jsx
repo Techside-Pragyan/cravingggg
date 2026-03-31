@@ -55,8 +55,10 @@ const RestaurantDetail = () => {
           src={restaurant.image}
           alt={restaurant.name}
           className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
           onError={(e) => {
-            e.target.src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800';
+            e.target.onerror = null;
+            e.target.src = 'https://placehold.co/800x400?text=Restaurant';
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />

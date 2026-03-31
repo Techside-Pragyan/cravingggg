@@ -80,8 +80,10 @@ const Cart = () => {
                   src={item.foodItem?.image}
                   alt={item.foodItem?.name}
                   className="w-16 h-16 rounded-xl object-cover"
+                  referrerPolicy="no-referrer"
                   onError={(e) => {
-                    e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
+                    e.target.onerror = null;
+                    e.target.src = 'https://placehold.co/400x400?text=Food';
                   }}
                 />
 

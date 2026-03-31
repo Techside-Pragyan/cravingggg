@@ -66,8 +66,10 @@ const FoodItemCard = ({ item }) => {
             src={item.image}
             alt={item.name}
             className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
             onError={(e) => {
-              e.target.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400';
+              e.target.onerror = null;
+              e.target.src = 'https://placehold.co/400x400?text=Food';
             }}
           />
         </div>
