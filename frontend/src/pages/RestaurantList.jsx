@@ -18,6 +18,8 @@ const RestaurantList = () => {
   const [selectedCuisine, setSelectedCuisine] = useState('All');
   const [isVeg, setIsVeg] = useState(false);
   const [sortBy, setSortBy] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   useEffect(() => {
     fetchRestaurants();
@@ -42,6 +44,7 @@ const RestaurantList = () => {
 
       const { data } = await api.getRestaurants(params);
       setRestaurants(data);
+      setCurrentPage(1); // Reset page on new fetch
     } catch (error) {
       console.error(error);
     } finally {
@@ -60,6 +63,7 @@ const RestaurantList = () => {
     setIsVeg(false);
     setSortBy('');
     setSearchParams({});
+    setCurrentPage(1);
   };
 
   const hasFilters = search || selectedCuisine !== 'All' || isVeg || sortBy;
@@ -164,10 +168,47 @@ const RestaurantList = () => {
         <>
           <p className="text-text-muted text-sm mb-4">{restaurants.length} restaurants found</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {restaurants.map((restaurant) => (
+            {currentRestaurants.map((restaurant) => (
               <RestaurantCard key={restaurant._id} restaurant={restaurant} />
             ))}
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-12">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 border rounded-xl disabled:opacity-50 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Previous
+              </button>
+              
+              <div className="flex gap-1">
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index + 1}
+                    onClick={() => setCurrentPage(index + 1)}
+                    className={`w-10 h-10 rounded-xl font-medium transition-all ${
+                      currentPage === index + 1
+                        ? 'bg-primary text-white shadow-md'
+                        : 'border hover:bg-gray-50 text-text-secondary'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 border rounded-xl disabled:opacity-50 hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
