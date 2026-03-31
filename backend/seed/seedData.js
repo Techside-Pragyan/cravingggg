@@ -243,6 +243,78 @@ const seedData = async () => {
     await FoodItem.create(foodItems);
     console.log('🍕 Food items created');
 
+    console.log('🚀 Generating 50 additional restaurants and 100 items per restaurant (5000 total items)...');
+    
+    const restaurantImages = [
+      'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
+      'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=800',
+      'https://images.unsplash.com/photo-1551024601-bec78aea704b?w=800',
+      'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800',
+      'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800'
+    ];
+    
+    const foodImages = [
+      'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
+      'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400',
+      'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400',
+      'https://images.unsplash.com/photo-1668236543090-82eb5eab6fee?w=400',
+      'https://images.unsplash.com/photo-1525755662778-989d0524087e?w=400',
+      'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=400',
+      'https://images.unsplash.com/photo-1610057099443-fde6c99db9e1?w=400',
+      'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=400'
+    ];
+
+    const extraRestaurantsData = [];
+    const cuisines = ['Italian', 'Chinese', 'North Indian', 'Mexican', 'American', 'Thai', 'Japanese', 'South Indian', 'Continental'];
+    
+    for (let i = 1; i <= 50; i++) {
+      extraRestaurantsData.push({
+        name: `Amazing Cuisine Hub ${i}`,
+        description: `Experience the best flavors at our newest location #${i}. Serving freshly cooked premium food.`,
+        cuisine: [cuisines[i % cuisines.length], 'Fast Food'],
+        image: restaurantImages[i % restaurantImages.length],
+        rating: Number((3.5 + Math.random() * 1.5).toFixed(1)),
+        totalRatings: Math.floor(Math.random() * 2000) + 50,
+        deliveryTime: `${20 + (i % 3) * 10}-${30 + (i % 3) * 10} min`,
+        deliveryFee: 20 + (i % 5) * 10,
+        minOrder: 100 + (i % 4) * 50,
+        address: { street: `Food Avenue ${i}`, city: 'Mumbai', zipCode: `4000${(i % 90) + 10}` },
+        isOpen: true,
+        isVeg: i % 4 === 0,
+        featured: i % 10 === 0,
+        tags: ['delicious', 'fresh', 'premium'],
+      });
+    }
+
+    const insertedExtraRestaurants = await Restaurant.create(extraRestaurantsData);
+    console.log('🍽️  50 Extra Restaurants created');
+
+    const categories = ['pizza', 'burger', 'biryani', 'chinese', 'desserts', 'south-indian', 'fast-food', 'beverages', 'main-course', 'starters'];
+    const extraFoodItems = [];
+
+    insertedExtraRestaurants.forEach((restaurant, rIndex) => {
+      for (let j = 1; j <= 100; j++) {
+        extraFoodItems.push({
+          name: `${restaurant.cuisine[0]} Delight ${j}`,
+          description: `A delicious and amazing item number ${j} from our chef's special menu at ${restaurant.name}.`,
+          price: 99 + Math.floor(Math.random() * 400),
+          image: foodImages[(rIndex + j) % foodImages.length],
+          category: categories[j % categories.length],
+          restaurant: restaurant._id,
+          isVeg: restaurant.isVeg ? true : (j % 3 === 0),
+          isBestseller: j % 20 === 0,
+          rating: Number((3.8 + Math.random() * 1.2).toFixed(1)),
+        });
+      }
+    });
+
+    // Insert food items in chunks to avoid memory/timeout issues
+    const chunkSize = 1000;
+    for (let i = 0; i < extraFoodItems.length; i += chunkSize) {
+      await FoodItem.create(extraFoodItems.slice(i, i + chunkSize));
+    }
+    console.log(`🍕 ${extraFoodItems.length} Extra Food items created`);
+
     console.log('\n✅ Seed data inserted successfully!');
     console.log('\n📧 Admin Login: admin@cravingggg.com / admin123');
     console.log('📧 User Login: john@example.com / password123');
