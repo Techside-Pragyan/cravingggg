@@ -68,6 +68,12 @@ const RestaurantList = () => {
 
   const hasFilters = search || selectedCuisine !== 'All' || isVeg || sortBy;
 
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentRestaurants = restaurants.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(restaurants.length / itemsPerPage);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
       {/* Header */}
