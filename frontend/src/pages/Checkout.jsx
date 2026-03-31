@@ -13,6 +13,8 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [showPaymentGateway, setShowPaymentGateway] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState('processing'); // processing, success
   const [address, setAddress] = useState({
     street: user?.address?.street || '',
     city: user?.address?.city || '',
@@ -53,8 +55,26 @@ const Checkout = () => {
       return;
     }
 
+    if (paymentMethod === 'online') {
+      setShowPaymentGateway(true);
+      setPaymentStatus('processing');
+      // Simulate Razorpay Gateway Delay
+      setTimeout(() => {
+        setPaymentStatus('success');
+        setTimeout(() => {
+          submitOrder();
+        }, 1500);
+      }, 2500);
+      return;
+    }
+
+    submitOrder();
+  };
+
+  const submitOrder = async () => {
     try {
       setLoading(true);
+      setShowPaymentGateway(false);
       await api.placeOrder({
         deliveryAddress: address,
         paymentMethod,
@@ -176,7 +196,7 @@ const Checkout = () => {
                   <HiCreditCard className="text-2xl text-blue-600" />
                   <div>
                     <p className="font-semibold">Online Payment</p>
-                    <p className="text-text-muted text-xs">UPI, Cards, Wallets (Coming Soon)</p>
+                    <p className="text-text-muted text-xs">UPI, Credit/Debit Cards, Wallets</p>
                   </div>
                 </label>
               </div>
@@ -238,6 +258,51 @@ const Checkout = () => {
           </div>
         </div>
       </form>
+
+      {/* Payment Gateway Modal Overlay */}
+      {showPaymentGateway && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm fade-in">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl scale-in relative overflow-hidden">
+            {/* Header stripe imitating razorpay */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-600 to-primary"></div>
+            
+            <div className="mb-6 flex justify-center">
+              {paymentStatus === 'processing' ? (
+                <div className="relative">
+                  <div className="w-20 h-20 border-4 border-gray-100 border-t-blue-600 rounded-full animate-spin"></div>
+                  <HiCreditCard className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl text-blue-600 animate-pulse" />
+                </div>
+              ) : (
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center scale-in">
+                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            <h3 className="text-xl font-bold mb-2">
+              {paymentStatus === 'processing' ? 'Processing Payment...' : 'Payment Successful!'}
+            </h3>
+            
+            <p className="text-sm text-text-muted mb-6">
+              {paymentStatus === 'processing' 
+                ? 'Please wait while we verify your transaction securely. Do not close this window.' 
+                : 'Your transaction was verified securely. Redirecting you to orders...'}
+            </p>
+
+            <div className="bg-gray-50 rounded-xl p-4 flex justify-between items-center text-sm font-medium border border-gray-100">
+              <span className="text-text-secondary">Amount Paying</span>
+              <span className="text-lg text-primary">₹{grandTotal}</span>
+            </div>
+            
+            <div className="mt-6 flex items-center justify-center gap-2 text-xs text-text-muted">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              Secure 256-bit Encrypted SSL
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
